@@ -71,6 +71,7 @@ class ViewController: UIViewController {
         return buttonPlay
     }()
 
+    //MARK: - Timer
 
     var timer = Timer()
     var isWorkTime = true
@@ -78,7 +79,43 @@ class ViewController: UIViewController {
     var timerDurationWork = 11
     var timerDurationvarRest = 6
 
+    //MARK: - Animations
+
+    let shapeLayer = CAShapeLayer()
+
+    func animationProgressBar() {
+        let center = CGPoint(x: view.frame.width / 2, y: view.frame.height / 2)
+        let endAngle = (CGFloat.pi / 2)
+        let startAngle = 2 * CGFloat.pi + endAngle
+
+        let circle = UIBezierPath(arcCenter: center,
+                                  radius: 120,
+                                  startAngle: startAngle,
+                                  endAngle: endAngle,
+                                  clockwise: false)
+
+        shapeLayer.path = circle.cgPath
+        shapeLayer.lineWidth = 21
+        shapeLayer.fillColor = UIColor.clear.cgColor
+        shapeLayer.strokeEnd = 1
+        shapeLayer.strokeColor = UIColor.yellow.cgColor
+        view.layer.addSublayer(shapeLayer)
+    }
+
+    func baseAnimation() {
+        let baseAnimation  = CABasicAnimation(keyPath: "strokeEnd")
+        baseAnimation.toValue = 0
+        baseAnimation.duration = CFTimeInterval(timerDurationWork)
+        baseAnimation.fillMode = CAMediaTimingFillMode.forwards
+        baseAnimation.isRemovedOnCompletion = true
+        shapeLayer.add(baseAnimation, forKey: "baseAnimation")
+    }
+
     //MARK: - LifeCycle
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        self.animationProgressBar()
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -120,7 +157,6 @@ class ViewController: UIViewController {
             buttonPlay.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 150),
             buttonPlay.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -150),
             buttonPlay.heightAnchor.constraint(equalToConstant: 100)
-
         ])
     }
 
@@ -131,7 +167,7 @@ class ViewController: UIViewController {
         restTimer()
     }
 
-   private func workTimer() {
+    private func workTimer() {
         if isWorkTime == true {
             timerDurationWork -= 1
             let minutes = timerDurationWork / 60
@@ -159,13 +195,13 @@ class ViewController: UIViewController {
 
     @objc func startButton() {
         if isStarted == false {
+            baseAnimation()
             buttonPlay.configuration?.image = Constant.pause
             timer = Timer.scheduledTimer(timeInterval: 1.0,
                                          target: self,
                                          selector: #selector(startTimer),
                                          userInfo: nil,
                                          repeats: true)
-
             isStarted = true
         } else { buttonPlay.configuration?.image = Constant.play
             timer.invalidate()
@@ -173,3 +209,10 @@ class ViewController: UIViewController {
         }
     }
 }
+
+
+
+
+
+
+
