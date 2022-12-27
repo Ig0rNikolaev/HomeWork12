@@ -18,7 +18,7 @@ fileprivate enum Constant {
 
     //Image
     static let background = UIImage(named: "circle")
-    static let play = UIImage(named: "play")
+    static let play = UIImage(named: "playOne")
     static let pause = UIImage(named: "pause")
     static let buttonImageSize = CATransform3DMakeScale(3, 3, 3)
 
@@ -59,16 +59,24 @@ class ViewController: UIViewController {
         return labelTimer
     }()
 
-    private lazy var buttonLogin: UIButton = {
-        let buttonLogin = UIButton(configuration: .plain(), primaryAction: nil)
-        buttonLogin.configuration?.image = Constant.play
-        buttonLogin.imageView?.layer.transform = Constant.buttonImageSize
-        buttonLogin.imageView?.contentMode = .scaleAspectFit
-        buttonLogin.translatesAutoresizingMaskIntoConstraints = false
-        // buttonLogin.configuration?.baseBackgroundColor = .yellow
-        //buttonLogin.shadowButton()
-        return buttonLogin
+    private lazy var buttonPlay: UIButton = {
+        let buttonPlay = UIButton(configuration: .plain(), primaryAction: nil)
+        buttonPlay.configuration?.image = Constant.play
+        buttonPlay.imageView?.layer.transform = Constant.buttonImageSize
+        buttonPlay.imageView?.contentMode = .scaleAspectFit
+        buttonPlay.translatesAutoresizingMaskIntoConstraints = false
+        buttonPlay.addTarget(self, action: #selector(startButton), for: .touchUpInside)
+        // buttonPlay.configuration?.baseBackgroundColor = .yellow
+        //buttonPlay.shadowButton()
+        return buttonPlay
     }()
+
+
+    var timer = Timer()
+    var isWorkTime = true
+    var isStarted = false
+    var timerDurationWork = 11
+    var timerDurationvarRest = 6
 
     //MARK: - LifeCycle
 
@@ -79,8 +87,7 @@ class ViewController: UIViewController {
         setupLayout()
     }
 
-//MARK: - Setups
-
+    //MARK: - Setups
 
     private func setupView() {
         view.backgroundColor = .white
@@ -91,8 +98,7 @@ class ViewController: UIViewController {
         view.addSubview(labelPomodoro)
         view.addSubview(labelTimer)
         view.addSubview(backgroundImage)
-        view.addSubview(buttonLogin)
-
+        view.addSubview(buttonPlay)
     }
 
     private func setupLayout() {
@@ -110,15 +116,60 @@ class ViewController: UIViewController {
             backgroundImage.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 22),
             backgroundImage.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -22),
 
-            buttonLogin.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -100),
-            buttonLogin.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 150),
-            buttonLogin.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -150),
-            buttonLogin.heightAnchor.constraint(equalToConstant: 100)
+            buttonPlay.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -100),
+            buttonPlay.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 150),
+            buttonPlay.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -150),
+            buttonPlay.heightAnchor.constraint(equalToConstant: 100)
 
-            ])
+        ])
     }
 
-//MARK: - Actions
+    //MARK: - Actions
 
+    @objc func startTimer() {
+        workTimer()
+        restTimer()
+    }
+
+   private func workTimer() {
+        if isWorkTime == true {
+            timerDurationWork -= 1
+            let minutes = timerDurationWork / 60
+            let seconds = timerDurationWork % 60
+            labelTimer.text = String(format: "%02d:%02d", minutes, seconds)
+            if timerDurationWork == 0 {
+                timerDurationWork += 11
+                isWorkTime = false
+            }
+        }
+    }
+
+    private func restTimer() {
+        if isWorkTime == false {
+            timerDurationvarRest -= 1
+            let minutes = timerDurationvarRest / 60
+            let seconds = timerDurationvarRest % 60
+            labelTimer.text = String(format: "%02d:%02d", minutes, seconds)
+            if timerDurationvarRest == 0 {
+                timerDurationvarRest += 6
+                isWorkTime = true
+            }
+        }
+    }
+
+    @objc func startButton() {
+        if isStarted == false {
+            buttonPlay.configuration?.image = Constant.pause
+            timer = Timer.scheduledTimer(timeInterval: 1.0,
+                                         target: self,
+                                         selector: #selector(startTimer),
+                                         userInfo: nil,
+                                         repeats: true)
+
+            isStarted = true
+        } else { buttonPlay.configuration?.image = Constant.play
+            timer.invalidate()
+            isStarted = false
+        }
+    }
 }
-
