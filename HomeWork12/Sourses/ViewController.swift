@@ -14,12 +14,13 @@ fileprivate enum Constant {
     static let labelPomodoroText = "POMODORO"
 
     // Colors
-    static let colorBlack = UIColor.black
+    static let labelPomodoroColor = UIColor.black
+    static let labelTimerColor = UIColor.black
 
     //Image
     static let background = UIImage(named: "circle")
-    static let play = UIImage(named: "playOne")
-    static let pause = UIImage(named: "pause")
+    static let play = UIImage(systemName: "play")
+    static let pause = UIImage(systemName: "pause")
     static let buttonImageSize = CATransform3DMakeScale(3, 3, 3)
 
     // Others
@@ -35,7 +36,7 @@ class ViewController: UIViewController {
     private lazy var labelPomodoro: UILabel = {
         let labelPomodoro = UILabel()
         labelPomodoro.text = Constant.labelPomodoroText
-        labelPomodoro.textColor = Constant.colorBlack
+        labelPomodoro.textColor = Constant.labelPomodoroColor
         labelPomodoro.font = Constant.labelPomodoroFont
         labelPomodoro.textAlignment = .center
         labelPomodoro.translatesAutoresizingMaskIntoConstraints = false
@@ -52,7 +53,7 @@ class ViewController: UIViewController {
     private lazy var labelTimer: UILabel = {
         let labelTimer = UILabel()
         labelTimer.text = Constant.labelTimerText
-        labelTimer.textColor = Constant.colorBlack
+        labelTimer.textColor = Constant.labelTimerColor
         labelTimer.font = Constant.labelTimerFont
         labelTimer.textAlignment = .center
         labelTimer.translatesAutoresizingMaskIntoConstraints = false
@@ -62,6 +63,7 @@ class ViewController: UIViewController {
     private lazy var buttonPlay: UIButton = {
         let buttonPlay = UIButton(configuration: .plain(), primaryAction: nil)
         buttonPlay.configuration?.image = Constant.play
+        buttonPlay.tintColor = .black
         buttonPlay.imageView?.layer.transform = Constant.buttonImageSize
         buttonPlay.imageView?.contentMode = .scaleAspectFit
         buttonPlay.translatesAutoresizingMaskIntoConstraints = false
@@ -81,40 +83,51 @@ class ViewController: UIViewController {
 
     //MARK: - Animations
 
-    let shapeLayer = CAShapeLayer()
+    //  let shapeLayer = CAShapeLayer()
 
-    func animationProgressBar() {
+    private lazy var shapeLayer: CAShapeLayer = {
+        let shapeLayer = CAShapeLayer()
         let center = CGPoint(x: view.frame.width / 2, y: view.frame.height / 2)
         let endAngle = (CGFloat.pi / 2)
         let startAngle = 2 * CGFloat.pi + endAngle
-
         let circle = UIBezierPath(arcCenter: center,
                                   radius: 120,
                                   startAngle: startAngle,
                                   endAngle: endAngle,
                                   clockwise: false)
-
         shapeLayer.path = circle.cgPath
         shapeLayer.lineWidth = 21
         shapeLayer.fillColor = UIColor.clear.cgColor
         shapeLayer.strokeEnd = 1
-        shapeLayer.strokeColor = UIColor.yellow.cgColor
-        view.layer.addSublayer(shapeLayer)
-    }
+        shapeLayer.strokeColor = UIColor.systemGray.cgColor
+        return shapeLayer
+    }()
 
     func baseAnimation() {
         let baseAnimation  = CABasicAnimation(keyPath: "strokeEnd")
         baseAnimation.toValue = 0
         baseAnimation.duration = CFTimeInterval(timerDurationWork)
+        baseAnimation.speed = 1
         baseAnimation.fillMode = CAMediaTimingFillMode.forwards
         baseAnimation.isRemovedOnCompletion = true
         shapeLayer.add(baseAnimation, forKey: "baseAnimation")
     }
 
+    func baseAnimationTwo() {
+        let baseAnimationTwo  = CABasicAnimation(keyPath: "strokeEnd")
+        baseAnimationTwo.toValue = 0
+        baseAnimationTwo.duration = CFTimeInterval(timerDurationvarRest)
+        baseAnimationTwo.speed = 1
+        baseAnimationTwo.fillMode = CAMediaTimingFillMode.forwards
+        baseAnimationTwo.isRemovedOnCompletion = true
+        shapeLayer.add(baseAnimationTwo, forKey: "baseAnimationTwo")
+    }
+
     //MARK: - LifeCycle
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        self.animationProgressBar()
+         animation()
+        animationTwo()
     }
 
     override func viewDidLoad() {
@@ -122,6 +135,7 @@ class ViewController: UIViewController {
         setupView()
         setupHierarchy()
         setupLayout()
+
     }
 
     //MARK: - Setups
@@ -136,6 +150,8 @@ class ViewController: UIViewController {
         view.addSubview(labelTimer)
         view.addSubview(backgroundImage)
         view.addSubview(buttonPlay)
+        view.layer.addSublayer(shapeLayer)
+
     }
 
     private func setupLayout() {
@@ -170,6 +186,10 @@ class ViewController: UIViewController {
     private func workTimer() {
         if isWorkTime == true {
             timerDurationWork -= 1
+            labelPomodoro.text = "WORK TIME"
+            labelTimer.textColor = .systemBlue
+            labelPomodoro.textColor = .systemBlue
+            buttonPlay.tintColor = .systemBlue
             let minutes = timerDurationWork / 60
             let seconds = timerDurationWork % 60
             labelTimer.text = String(format: "%02d:%02d", minutes, seconds)
@@ -183,6 +203,10 @@ class ViewController: UIViewController {
     private func restTimer() {
         if isWorkTime == false {
             timerDurationvarRest -= 1
+            labelPomodoro.text = "REST TIME"
+            labelTimer.textColor = .systemGreen
+            labelPomodoro.textColor = .systemGreen
+            buttonPlay.tintColor = .systemGreen
             let minutes = timerDurationvarRest / 60
             let seconds = timerDurationvarRest % 60
             labelTimer.text = String(format: "%02d:%02d", minutes, seconds)
@@ -193,9 +217,24 @@ class ViewController: UIViewController {
         }
     }
 
+    func animation() {
+       if timerDurationWork == 10 {
+            baseAnimation()
+        }
+    }
+
+        func animationTwo() {
+          if timerDurationvarRest == 5 {
+                baseAnimationTwo()
+            }
+        }
+
+
+
+
     @objc func startButton() {
         if isStarted == false {
-            baseAnimation()
+            shapeLayer.resumeAnimation()
             buttonPlay.configuration?.image = Constant.pause
             timer = Timer.scheduledTimer(timeInterval: 1.0,
                                          target: self,
@@ -203,12 +242,46 @@ class ViewController: UIViewController {
                                          userInfo: nil,
                                          repeats: true)
             isStarted = true
-        } else { buttonPlay.configuration?.image = Constant.play
+        } else {
+            shapeLayer.pauseAnimation()
+            buttonPlay.configuration?.image = Constant.play
             timer.invalidate()
             isStarted = false
         }
     }
 }
+
+    extension CALayer
+       {
+           func pauseAnimation() {
+               if isPaused() == false {
+                   let pausedTime = convertTime(CACurrentMediaTime(), from: nil)
+                   speed = 0.0
+                   timeOffset = pausedTime
+               }
+           }
+
+           func resumeAnimation() {
+               if isPaused() {
+                   let pausedTime = timeOffset
+                   speed = 1.0
+                   timeOffset = 0.0
+                   beginTime = 0.0
+                   let timeSincePause = convertTime(CACurrentMediaTime(), from: nil) - pausedTime
+                   beginTime = timeSincePause
+               }
+           }
+
+           func isPaused() -> Bool {
+               return speed == 0
+           }
+       }
+
+
+
+
+
+
 
 
 
