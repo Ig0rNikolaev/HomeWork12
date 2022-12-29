@@ -7,55 +7,29 @@
 
 import UIKit
 
-fileprivate enum Constant {
-
-    // Strings
-    static let labelTimerText = "00:00"
-    static let labelPomodoroText = "POMODORO"
-    static let labelWork = "WORK TIME"
-    static let labelRest = "REST TIME"
-
-    // Colors
-    static let labelPomodoroColor = UIColor.white
-    static let colorWhite = UIColor.white
-    static let colorBlue = UIColor.systemCyan
-    static let colorGreen = UIColor.systemTeal
-    static let colorGrey6 = UIColor.systemGray6
-
-    //Image
-    static let background = UIImage(named: "circle")
-    static let play = UIImage(systemName: "play.fill")
-    static let pause = UIImage(systemName: "pause.fill")
-    static let buttonImageSize = CATransform3DMakeScale(3, 3, 3)
-
-    // Others
-    static let labelTimerFont = UIFont(name: "Futura", size: 65.0)
-    static let labelPomodoroFont = UIFont(name: "Futura", size: 55.0)
-}
-
 class ViewController: UIViewController {
-
+    
     //MARK: - UI Elements
-
+    
     private lazy var labelPomodoro: UILabel = {
         let labelPomodoro = UILabel()
         labelPomodoro.shadowLabel()
         labelPomodoro.text = Constant.labelPomodoroText
-        labelPomodoro.textColor = Constant.labelPomodoroColor
+        labelPomodoro.textColor = Constant.colorWhite
         labelPomodoro.font = Constant.labelPomodoroFont
         labelPomodoro.textAlignment = .center
         labelPomodoro.translatesAutoresizingMaskIntoConstraints = false
         return labelPomodoro
     }()
-
-    private lazy var backgroundImage: UIImageView = {
-        let backgroundImage = UIImageView(image: Constant.background)
-        backgroundImage.contentMode = .center
-        backgroundImage.transform3D = CATransform3DMakeScale(0.2, 0.2, 0.2)
-        backgroundImage.translatesAutoresizingMaskIntoConstraints = false
-        return backgroundImage
+    
+    private lazy var backgroundImageCircle: UIImageView = {
+        let backgroundImageCircle = UIImageView(image: Constant.backgroundImageCircle)
+        backgroundImageCircle.contentMode = .center
+        backgroundImageCircle.transform3D = Constant.backgroundImageCircleSize
+        backgroundImageCircle.translatesAutoresizingMaskIntoConstraints = false
+        return backgroundImageCircle
     }()
-
+    
     private lazy var labelTimer: UILabel = {
         let labelTimer = UILabel()
         labelTimer.shadowLabel()
@@ -66,11 +40,11 @@ class ViewController: UIViewController {
         labelTimer.translatesAutoresizingMaskIntoConstraints = false
         return labelTimer
     }()
-
+    
     private lazy var buttonPlay: UIButton = {
         let buttonPlay = UIButton(configuration: .plain(), primaryAction: nil)
         buttonPlay.shadowButton()
-        buttonPlay.configuration?.image = Constant.play
+        buttonPlay.configuration?.image = Constant.buttonPlay
         buttonPlay.tintColor = Constant.colorWhite
         buttonPlay.imageView?.layer.transform = Constant.buttonImageSize
         buttonPlay.imageView?.contentMode = .scaleAspectFit
@@ -78,7 +52,7 @@ class ViewController: UIViewController {
         buttonPlay.addTarget(self, action: #selector(startButton), for: .touchUpInside)
         return buttonPlay
     }()
-
+    
     private lazy var shapeLayer: CAShapeLayer = {
         let shapeLayer = CAShapeLayer()
         let center = CGPoint(x: view.frame.width / 2, y: view.frame.height / 2)
@@ -96,78 +70,41 @@ class ViewController: UIViewController {
         shapeLayer.strokeColor = UIColor.systemGray3.cgColor
         return shapeLayer
     }()
-
+    
     //MARK: - Timer
-
+    
     var timer = Timer()
     var isWorkTime = true
     var isStarted = false
     var timerDurationWork = 11
     var timerDurationvarRest = 6
-
+    
     //MARK: - LifeCycle
-
+    
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        view.layer.addSublayer(shapeLayer)
-        animation()
-        animationTwo()
+        startAnimationWork()
+        startAnimationRest()
     }
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
         setupHierarchy()
         setupLayout()
     }
-
-    //MARK: - Setups
-
-    private func setupView() {
-        view.backgroundColor = Constant.colorGrey6
-}
-
-    private func setupHierarchy() {
-        view.addSubview(backgroundImage)
-        view.addSubview(labelPomodoro)
-        view.addSubview(labelTimer)
-        view.layer.addSublayer(shapeLayer)
-        view.addSubview(buttonPlay)
-    }
-
-    private func setupLayout() {
-        NSLayoutConstraint.activate([
-
-            labelPomodoro.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            labelPomodoro.topAnchor.constraint(equalTo: view.topAnchor, constant: 100),
-
-            labelTimer.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            labelTimer.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            labelTimer.topAnchor.constraint(equalTo: view.topAnchor, constant: 250),
-
-            backgroundImage.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            backgroundImage.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-
-
-            buttonPlay.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -100),
-            buttonPlay.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 150),
-            buttonPlay.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -150),
-            buttonPlay.topAnchor.constraint(equalTo: backgroundImage.bottomAnchor, constant: 170),
-            buttonPlay.heightAnchor.constraint(equalToConstant: 100),
-        ])
-    }
-
+    
     //MARK: - Actions
-
+    
     @objc func startTimer() {
         workTimer()
         restTimer()
     }
-
+    
     @objc func startButton() {
         if isStarted == false {
             shapeLayer.resumeAnimation()
-            buttonPlay.configuration?.image = Constant.pause
+            buttonPlay.configuration?.image = Constant.buttonPause
             timer = Timer.scheduledTimer(timeInterval: 1.0,
                                          target: self,
                                          selector: #selector(startTimer),
@@ -176,12 +113,26 @@ class ViewController: UIViewController {
             isStarted = true
         } else {
             shapeLayer.pauseAnimation()
-            buttonPlay.configuration?.image = Constant.play
+            buttonPlay.configuration?.image = Constant.buttonPlay
             timer.invalidate()
             isStarted = false
         }
     }
-
+    
+    //MARK: - Setups
+    
+    private func setupView() {
+        view.backgroundColor = Constant.colorGrey6
+    }
+    
+    private func setupHierarchy() {
+        view.addSubview(backgroundImageCircle)
+        view.addSubview(labelPomodoro)
+        view.addSubview(labelTimer)
+        view.layer.addSublayer(shapeLayer)
+        view.addSubview(buttonPlay)
+    }
+    
     private func workTimer() {
         if isWorkTime == true {
             timerDurationWork -= 1
@@ -198,7 +149,7 @@ class ViewController: UIViewController {
             }
         }
     }
-
+    
     private func restTimer() {
         if isWorkTime == false {
             timerDurationvarRest -= 1
@@ -215,8 +166,8 @@ class ViewController: UIViewController {
             }
         }
     }
-
-    func baseAnimation() {
+    
+    func baseAnimationWork() {
         let baseAnimation  = CABasicAnimation(keyPath: "strokeEnd")
         baseAnimation.toValue = 0
         baseAnimation.duration = CFTimeInterval(timerDurationWork)
@@ -225,8 +176,8 @@ class ViewController: UIViewController {
         baseAnimation.isRemovedOnCompletion = true
         shapeLayer.add(baseAnimation, forKey: "baseAnimation")
     }
-
-    func baseAnimationTwo() {
+    
+    func baseAnimationRest() {
         let baseAnimationTwo  = CABasicAnimation(keyPath: "strokeEnd")
         baseAnimationTwo.toValue = 0
         baseAnimationTwo.duration = CFTimeInterval(timerDurationvarRest)
@@ -235,17 +186,38 @@ class ViewController: UIViewController {
         baseAnimationTwo.isRemovedOnCompletion = true
         shapeLayer.add(baseAnimationTwo, forKey: "baseAnimationTwo")
     }
-
-    func animation() {
+    
+    func startAnimationWork() {
         if timerDurationWork == 10 {
-            baseAnimation()
+            baseAnimationWork()
         }
     }
-
-    func animationTwo() {
+    
+    func startAnimationRest() {
         if timerDurationvarRest == 5 {
-            baseAnimationTwo()
+            baseAnimationRest()
         }
+    }
+    
+    private func setupLayout() {
+        NSLayoutConstraint.activate([
+            
+            labelPomodoro.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            labelPomodoro.topAnchor.constraint(equalTo: view.topAnchor, constant: 100),
+            
+            labelTimer.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            labelTimer.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            labelTimer.topAnchor.constraint(equalTo: view.topAnchor, constant: 250),
+            
+            backgroundImageCircle.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            backgroundImageCircle.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+
+            buttonPlay.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -100),
+            buttonPlay.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 150),
+            buttonPlay.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -150),
+            buttonPlay.topAnchor.constraint(equalTo: backgroundImageCircle.bottomAnchor, constant: 170),
+            buttonPlay.heightAnchor.constraint(equalToConstant: 100),
+        ])
     }
 }
 

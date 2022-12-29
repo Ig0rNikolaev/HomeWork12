@@ -7,6 +7,8 @@
 
 import UIKit
 
+//MARK: - CALayer
+
 extension CALayer {
 
     func pauseAnimation() {
@@ -33,6 +35,8 @@ extension CALayer {
     }
 }
 
+//MARK: - UIButton
+
 extension UIButton {
 
     func shadowButton() {
@@ -43,6 +47,8 @@ extension UIButton {
         self.layer.masksToBounds = false
     }
 }
+
+//MARK: - UILabel
 
 extension UILabel {
 
