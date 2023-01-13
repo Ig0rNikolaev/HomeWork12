@@ -10,7 +10,7 @@ import UIKit
     enum Constant {
 
     // Strings
-    static let labelTimerText = "00:00"
+    static let labelTimerText = "00:10"
     static let labelPomodoroText = "POMODORO"
     static let labelWork = "WORK TIME"
     static let labelRest = "REST TIME"
@@ -28,7 +28,6 @@ import UIKit
     static let buttonPlay = UIImage(systemName: "play.fill")
     static let buttonPause = UIImage(systemName: "pause.fill")
     static let buttonImageSize = CATransform3DMakeScale(3, 3, 3)
-
     static let  backgroundImageCircleSize = CATransform3DMakeScale(0.2, 0.2, 0.2)
 
     // Others
