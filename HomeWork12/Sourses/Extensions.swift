@@ -60,3 +60,10 @@ extension UILabel {
         self.layer.masksToBounds = false
     }
 }
+
+extension Int {
+    var degreesToRadians:CGFloat {
+        return CGFloat(self) * .pi / 100
+    }
+}
+
