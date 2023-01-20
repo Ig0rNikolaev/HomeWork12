@@ -24,7 +24,6 @@ import UIKit
 
     //Image
     static let backgroundImageCircle = UIImage(named: "circle")
-
     static let buttonPlay = UIImage(systemName: "play.fill")
     static let buttonPause = UIImage(systemName: "pause.fill")
     static let buttonImageSize = CATransform3DMakeScale(3, 3, 3)
