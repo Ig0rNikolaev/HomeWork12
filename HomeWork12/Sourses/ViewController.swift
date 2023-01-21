@@ -22,13 +22,13 @@ class ViewController: UIViewController, CAAnimationDelegate {
     private var isWorkTime = false
     private var isStarted = false
     private var isAnimationStarted = true
+    private var isPaused = false
 
     //MARK: - UI Elements
     
     private lazy var labelPomodoro: UILabel = {
         let labelPomodoro = UILabel()
         labelPomodoro.shadowLabel()
-        labelPomodoro.text = Constant.labelPomodoroText
         labelPomodoro.textColor = Constant.colorWhite
         labelPomodoro.font = Constant.labelPomodoroFont
         labelPomodoro.textAlignment = .center
@@ -122,13 +122,48 @@ class ViewController: UIViewController, CAAnimationDelegate {
             progressAnimation(duration: TimeInterval(time))
         } else {
             timer.invalidate()
-            let presentation = frontProgressLayer.presentation()
-            frontProgressLayer.strokeEnd = presentation?.strokeEnd ?? 0
-            frontProgressLayer.removeAnimation(forKey: "animation")
-            buttonPlay.setImage(Constant.buttonPlay, for: .normal)
-            buttonPlay.tintColor = .green
-            isStarted = false
+            if !isPaused {
+                isPaused = true
+                pauseAnimation()
+                buttonPlay.setImage(Constant.buttonPlay, for: .normal)
+                buttonPlay.tintColor = .green
+            } else {
+                isPaused = false
+                settingTimer()
+                resumeAnimation()
+                buttonPlay.setImage(Constant.buttonPause, for: .normal)
+                buttonPlay.tintColor = .systemRed
+            }
         }
+    }
+
+    func resumeAnimation() {
+        let pausedTime = shapeLayer.timeOffset
+        shapeLayer.speed = 1.0
+        shapeLayer.timeOffset = 0.0
+        shapeLayer.beginTime = 0.0
+        let timeSincePause = shapeLayer.convertTime(CACurrentMediaTime(), from: nil) - pausedTime
+        shapeLayer.beginTime = timeSincePause
+        backProgressLayer.speed = 1.0
+        backProgressLayer.timeOffset = 0.0
+        backProgressLayer.beginTime = 0.0
+        let timeSincePause1 = backProgressLayer.convertTime(CACurrentMediaTime(), from: nil) - pausedTime
+        backProgressLayer.beginTime = timeSincePause1
+        frontProgressLayer.speed = 1.0
+        frontProgressLayer.timeOffset = 0.0
+        frontProgressLayer.beginTime = 0.0
+        let timeSincePause2 = frontProgressLayer.convertTime(CACurrentMediaTime(), from: nil) - pausedTime
+        frontProgressLayer.beginTime = timeSincePause2
+    }
+
+    func pauseAnimation() {
+        let pausedTime = shapeLayer.convertTime(CACurrentMediaTime(), from: nil)
+        shapeLayer.speed = 0.0
+        shapeLayer.timeOffset = pausedTime
+        backProgressLayer.speed = 0.0
+        backProgressLayer.timeOffset = pausedTime
+        frontProgressLayer.speed = 0.0
+        frontProgressLayer.timeOffset = pausedTime
     }
     //MARK: - Setups
 

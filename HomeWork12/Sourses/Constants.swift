@@ -11,7 +11,6 @@ import UIKit
 
     // Strings
     static let labelTimerText = "00:10"
-    static let labelPomodoroText = "POMODORO"
     static let labelWork = "WORK TIME"
     static let labelRest = "REST TIME"
 
