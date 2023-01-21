@@ -147,13 +147,13 @@ class ViewController: UIViewController, CAAnimationDelegate {
         backProgressLayer.speed = 1.0
         backProgressLayer.timeOffset = 0.0
         backProgressLayer.beginTime = 0.0
-        let timeSincePause1 = backProgressLayer.convertTime(CACurrentMediaTime(), from: nil) - pausedTime
-        backProgressLayer.beginTime = timeSincePause1
+        let timeSincePauseOne = backProgressLayer.convertTime(CACurrentMediaTime(), from: nil) - pausedTime
+        backProgressLayer.beginTime = timeSincePauseOne
         frontProgressLayer.speed = 1.0
         frontProgressLayer.timeOffset = 0.0
         frontProgressLayer.beginTime = 0.0
-        let timeSincePause2 = frontProgressLayer.convertTime(CACurrentMediaTime(), from: nil) - pausedTime
-        frontProgressLayer.beginTime = timeSincePause2
+        let timeSincePauseTwo = frontProgressLayer.convertTime(CACurrentMediaTime(), from: nil) - pausedTime
+        frontProgressLayer.beginTime = timeSincePauseTwo
     }
 
     func pauseAnimation() {
